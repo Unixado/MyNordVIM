@@ -14,7 +14,7 @@ set undodir=~/.vim/undodir
 set undofile
 set incsearch
 set ignorecase
-set smartcase 
+set smartcase
 set encoding=UTF-8
 set history=1000
 set wildmenu
@@ -22,19 +22,22 @@ set noshowmode
 set autoindent
 set expandtab
 set laststatus=2
-set colorcolumn=120
-set ttimeout ttimeoutlen=50 "added for improving airline's speed"  
+set colorcolumn=80
+set ttimeout ttimeoutlen=50 "added for improving airline's speed"
 set term=kitty
+filetype plugin on
 
 if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+                \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 call plug#begin('~/.vim/plugged')
 
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'lervag/vimtex'
+Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex'  }
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'tpope/vim-fugitive'
 Plug 'kien/ctrlp.vim'
@@ -45,17 +48,24 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'neoclide/coc.nvim'
 Plug 'junegunn/goyo.vim'
 Plug 'morhetz/gruvbox'
+Plug 'preservim/nerdcommenter'
+Plug 'jiangmiao/auto-pairs'
+Plug 'Chiel92/vim-autoformat'
+Plug 'Yggdroot/indentLine'
+Plug 'Valloric/YouCompleteMe'
 
 call plug#end()
 
 
 augroup nord-overrides
-  autocmd!
-  autocmd ColorScheme nord highlight Comment ctermfg=16
+    autocmd!
+    autocmd ColorScheme nord highlight Comment ctermfg=16
 augroup END
 
 colorscheme nord
+let g:indentLine_enabled = 0
 let g:nord_cursor_line_number_background = 1
+let g:indentLine_defaultGroup = 'SpecialKey'
 let g:nord_uniform_diff_background = 1
 let g:nord_italic_comments = 1
 let g:nord_uniform_status_lines = 1
@@ -74,8 +84,39 @@ let g:WebDevIconsUnicodeDecorateFolderNodes = 1
 let g:DevIconsEnableFoldersOpenClose = 1
 let g:DevIconsEnableFolderPatternMatching = 1
 let g:WebDevIconsUnicodeGlyphDoubleWidth = 1
-let g:webdevicons_conceal_nerdtree_brackets = 1 
+let g:webdevicons_conceal_nerdtree_brackets = 1
 let g:airline_section_z = airline#section#create(['windowswap', '%3p%% ', 'linenr', ':%3v'])
+
+let g:tex_flavor='latex'
+let g:vimtex_view_method='zathura'
+let g:vimtex_quickfix_mode=0
+set conceallevel=1
+let g:tex_conceal='abdmg'
+let g:livepreview_previewer = 'zathura'
+
+let g:ycm_auto_hover = ''
+let g:ycm_disable_signature_help = 1
+let g:loaded_youcompleteme = 1
+let g:enable_ycm_at_startup = 0
+
+:au VimEnter * :GitGutterSignsDisable
+set completeopt-=preview
+
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+" " Use compact syntax for prettified multi-line comments
+let g:NERDCompactSexyComs = 1
+" " Align line-wise comment delimiters flush left instead of following code
+" indentation
+let g:NERDDefaultAlign = 'left'
+" " Set a language to use its alternate delimiters by default
+let g:NERDAltDelims_java = 1
+" " Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDCommentEmptyLines = 1
+" " Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
+" " Enable NERDCommenterToggle to check all selected lines is commented or not
+let g:NERDToggleCheckAllLines = 1
 
 if executable('rg')
     let g:rg_derive_root='true'
@@ -103,37 +144,39 @@ set shortmess+=c
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
 if has("patch-8.1.1564")
-  " Recently vim can merge signcolumn and number column into one
-  set signcolumn=number
+    " Recently vim can merge signcolumn and number column into one
+    set signcolumn=number
 else
-  set signcolumn=yes
+    set signcolumn=yes
 endif
 
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
+            \ pumvisible() ? "\<C-n>" :
+            \ <SID>check_back_space() ? "\<TAB>" :
+            \ coc#refresh()
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
 function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
 " Use <c-space> to trigger completion.
 if has('nvim')
-  inoremap <silent><expr> <c-space> coc#refresh()
+    inoremap <silent><expr> <c-space> coc#refresh()
 else
-  inoremap <silent><expr> <c-@> coc#refresh()
+    inoremap <silent><expr> <c-@> coc#refresh()
 endif
 
 " Make <CR> auto-select the first completion item and notify coc.nvim to
 " format on enter, <cr> could be remapped by other vim plugin
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
-                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+            \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+noremap <F3> :Autoformat<CR>
+au BufWrite * :Autoformat
 
 " Use `[g` and `]g` to navigate diagnostics
 " Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
@@ -150,13 +193,13 @@ nmap <silent> gr <Plug>(coc-references)
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  elseif (coc#rpc#ready())
-    call CocActionAsync('doHover')
-  else
-    execute '!' . &keywordprg . " " . expand('<cword>')
-  endif
+    if (index(['vim','help'], &filetype) >= 0)
+        execute 'h '.expand('<cword>')
+    elseif (coc#rpc#ready())
+        call CocActionAsync('doHover')
+    else
+        execute '!' . &keywordprg . " " . expand('<cword>')
+    endif
 endfunction
 
 " Highlight the symbol and its references when holding the cursor.
@@ -170,11 +213,11 @@ xmap <leader>f  <Plug>(coc-format-selected)
 nmap <leader>f  <Plug>(coc-format-selected)
 
 augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder.
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+    autocmd!
+    " Setup formatexpr specified filetype(s).
+    autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+    " Update signature help on jump placeholder.
+    autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 augroup end
 
 " Applying codeAction to the selected region.
@@ -208,8 +251,8 @@ inoremap <nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(
 " NeoVim-only mapping for visual mode scroll
 " Useful on signatureHelp after jump placeholder of snippet expansion
 if has('nvim')
-  vnoremap <nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#nvim_scroll(1, 1) : "\<C-f>"
-  vnoremap <nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#nvim_scroll(0, 1) : "\<C-b>"
+    vnoremap <nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#nvim_scroll(1, 1) : "\<C-f>"
+    vnoremap <nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#nvim_scroll(0, 1) : "\<C-b>"
 endif
 
 " Use CTRL-S for selections ranges.
